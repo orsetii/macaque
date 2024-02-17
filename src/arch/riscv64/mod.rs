@@ -1,4 +1,4 @@
-use crate::{arch::mm::MaqAllocator, println};
+use crate::{arch::mm::alloc::MaqAllocator, println};
 
 pub mod boot;
 pub mod mm;
@@ -12,8 +12,14 @@ impl super::Arch for RiscV64 {
         println!("Walnut initializing...");
         let alloca = MaqAllocator::new();
         unsafe {
-            alloca.alloc_pages(64);
-            alloca.print_page_table();
+            if let Some(ptr) = alloca.alloc_pages(64) {
+                println!("Found and allocated pages at {:0p}", ptr);
+                alloca.print_page_table();
+                mm::init_mm(&alloca);
+            } else {
+                println!("Unable to find space to allocate {} pages for kernel!", 64);
+                panic!();
+            }
             core::arch::asm!("nop;nop;")
         }
     }
