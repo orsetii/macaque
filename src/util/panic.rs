@@ -1,4 +1,7 @@
+use crate::println;
+
 #[panic_handler]
-fn panic_handler(_info: &core::panic::PanicInfo) -> ! {
+fn panic_handler(info: &core::panic::PanicInfo) -> ! {
+    println!("PANIC: {:#?}", info);
     loop {}
 }

@@ -65,16 +65,14 @@ _start_m_bss_zero_loop:
 				bltu    a0,     a1,         _start_m_bss_zero_loop
 				j _start_m_delegate_interrupts
 		
-
 _start_m_delegate_interrupts:
-		# TODO
+		# TODO delegate interrupts to be handled in s-mode
 
 _start_m_init_stack:
 		# load the stack pointer from
 		# the link script. 	
 		# It is calculated as _bss_end + 0x80000 (524 KiB Total)
 		la sp, _stack_end
-
 
 _start_m_kinit_init_mstatus:
 		.set M_ENABLE_MACHINE_MODE, (0b11 << 11)
@@ -87,8 +85,6 @@ _start_m_kinit_init_mstatus:
 _start_m_load_trap_vector:
 		la t2, m_trap_vector
 		csrw mtvec, t2
-
-
 
 
 # Load the kinit function address 
@@ -105,7 +101,6 @@ _start_m_m_kinit:
 		mret
 
 
-
 # =========================================================================================
 # ===================================== SUPERVISOR MODE  ==================================
 # =========================================================================================
@@ -120,27 +115,35 @@ _start_s_kmain_init_sstatus:
 		li		t0, S_SET_SUPERVISOR_SPP | S_ENABLE_INTERRUPTS | S_SET_PREV_INTERRUPT_ENABLED
 		csrw	sstatus, t0
 
+
 _start_s_kmain_init_sie:
 		.set S_ENABLE_SOFTWARE_INTERRUPTS, (1 << 1)
 		.set S_ENABLE_TIMER_INTERRUPTS, (1 << 5)
 		.set S_ENABLE_EXTERNAL_INTERRUPTS, (1 << 9)
 
-		li		t0, S_ENABLE_TIMER_INTERRUPTS | S_ENABLE_TIMER_INTERRUPTS | S_ENABLE_EXTERNAL_INTERRUPTS
-		csrw	sie, t0
+		li		t1, S_ENABLE_TIMER_INTERRUPTS | S_ENABLE_TIMER_INTERRUPTS | S_ENABLE_EXTERNAL_INTERRUPTS
+		csrw	sie, t1
 
+_start_s_init_stvec:
+		la		t3, s_trap_vector
+		csrw stvec, t3
 
-
+_start_s_set_mpp:
+		.set S_ENABLE_SUPERVISOR_MODE, (0b01 << 11)
+		li		t0, S_ENABLE_SUPERVISOR_MODE
+		csrw	mstatus, t0
+		
 # Load the kmain function address 
-# into the `Machine Exception Program Counter` CSR
+# into the `Supervisor Exception Program Counter` CSR
+# This is technically needed only when executing 
+# a S-mode to U-mode change, which we are NOT 
+# performing here (note the lack of `sret` below)
 _start_s_load_kmain:
-		la t1, kmain
-		csrw sepc, t1
+		la t4, kmain
+		csrw sepc, t4
 
 _start_s_return:
-		# We don't need to set the `ra`
-		# register here, unlike in machine mode
-		# as we will never return back!
-		sret
+		jal kmain
 
 # Note: i stole this code, i dont actually really know what or why it does. will revisit post-paging impl
 hart_parking_lot:

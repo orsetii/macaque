@@ -1,4 +1,7 @@
+use crate::{arch::mm::MaqAllocator, println};
+
 pub mod boot;
+pub mod mm;
 pub mod trap;
 
 struct RiscV64;
@@ -6,7 +9,13 @@ struct RiscV64;
 impl super::Arch for RiscV64 {
     #[no_mangle]
     extern "C" fn kinit() {
-        unsafe { core::arch::asm!("nop;nop;") }
+        println!("Walnut initializing...");
+        let alloca = MaqAllocator::new();
+        unsafe {
+            alloca.alloc_pages(64);
+            alloca.print_page_table();
+            core::arch::asm!("nop;nop;")
+        }
     }
 }
 
