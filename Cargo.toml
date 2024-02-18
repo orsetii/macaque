@@ -6,8 +6,18 @@ author = "Tom French"
 description = "OS"
 license = "MIT"
 
+[features]
+default = ["riscv", "riscv-sv39"]
+
+riscv = []
+riscv-sv39 = ["riscv"]
+
 [profile.dev]
 panic = "abort"
 
 [profile.release]
 panic = "abort"
+
+
+[dependencies]
+mycelium-bitfield = "0.1.5"

@@ -1,4 +1,1 @@
-#[repr(transparent)]
-pub struct VirtAddr(usize);
-#[repr(transparent)]
-pub struct PhysAddr(usize);
+pub trait Address: core::fmt::Display + core::fmt::Debug + Copy + Clone {}
