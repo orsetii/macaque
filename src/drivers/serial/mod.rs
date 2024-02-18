@@ -2,15 +2,17 @@ pub mod uart_16550;
 
 use uart_16550::SerialPort;
 
-lazy_static::lazy_static! {
-    pub static ref SERIAL: SerialPort = SerialPort::new(0x1000_0000);
-}
+use crate::sync::spinlock::OnceCell;
+
+pub static mut SERIAL: OnceCell<SerialPort> = OnceCell::new();
 
 #[macro_export]
 macro_rules! print {
      	($($args:tt)+) => ({
  			use core::fmt::Write;
- 			let _ = write!(crate::drivers::serial::SERIAL.lock(), $($args)+);
+            unsafe {
+ 			let _ = write!(crate::drivers::serial::SERIAL.get_or_init(|| crate::drivers::serial::uart_16550::SerialPort::new(0x1000_0000)).lock(), $($args)+);
+            }
  	});
  }
 
