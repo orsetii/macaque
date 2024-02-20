@@ -3,6 +3,7 @@ use crate::println;
 pub mod boot;
 pub mod mm;
 pub mod trap;
+pub mod mm2;
 
 struct RiscV64;
 
@@ -10,7 +11,7 @@ impl super::Arch for RiscV64 {
     #[no_mangle]
     extern "C" fn kinit() {
         println!("Walnut initializing...");
-        mm::initialize();
+        mm2::init();
         unsafe { core::arch::asm!("nop;nop;") }
     }
 }

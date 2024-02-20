@@ -1,5 +1,7 @@
 #![allow(dead_code)]
 
+use super::PAGE_SIZE;
+
 extern "C" {
     static HEAP_START: u64;
     static HEAP_SIZE: u64;
@@ -13,6 +15,15 @@ extern "C" {
     static BSS_END: u64;
     static KERNEL_STACK_START: u64;
     static KERNEL_STACK_END: u64;
+}
+
+
+pub fn heap_page_count() -> usize {
+    // this performs a fucky hack to get
+    // the page count as a constant
+    unsafe {
+    (HEAP_SIZE / PAGE_SIZE) as usize
+    }
 }
 
 pub fn heap_start() -> u64 {

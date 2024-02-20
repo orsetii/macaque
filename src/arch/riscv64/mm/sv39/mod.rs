@@ -8,6 +8,8 @@
 //! The 27-bit VPN is translated into a 44-bit PPN via a
 //! three level page table, while the 12-bit page offset is untranslated.
 
+use core::ptr::null_mut;
+
 use crate::println;
 
 /// Defines address types for this
@@ -25,8 +27,9 @@ pub mod page;
 const PAGE_ORDER: u64 = 12;
 pub const PAGE_SIZE: u64 = 1 << 12;
 
+
 pub fn initialize() {
-    // sticking sstatic hit here to test
+
     let addr = addr::VirtAddr::from(super::constants::text_start());
     println!("Text section address: {:#x}", addr);
 }

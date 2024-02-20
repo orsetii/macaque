@@ -13,8 +13,21 @@ bitfield! {
 }
 
 impl VirtAddr {
+
+    pub fn vpn(&self) -> [u64;3] {
+        [
+        self.get(Self::VPN_0),
+        self.get(Self::VPN_1),
+        self.get(Self::VPN_2),
+        ]
+    }
+
     pub fn as_u64(&self) -> u64 {
         self.0
+    }
+
+    pub fn as_usize(&self) -> usize {
+        self.0 as usize
     }
 
     pub fn add(&mut self, a: usize) {
@@ -22,6 +35,13 @@ impl VirtAddr {
         // we use the compilers implementation of
         // address math, instead of making it ourselves.
         unsafe { self.0 = (self.0 as *mut u8).add(a) as u64 }
+    }
+
+    pub fn sub(&mut self, a: usize) {
+        // by doing it in this weird looking way
+        // we use the compilers implementation of the
+        // address math, instead of making it ourselves.
+        unsafe { self.0 = (self.0 as *mut u8).sub(a) as u64 }
     }
 
     pub fn at_offset(&self, offset: usize) -> Self {
@@ -48,4 +68,42 @@ bitfield! {
 
 impl Address for PhysAddr {
     //
+}
+
+impl PhysAddr {
+    pub fn ppn(&self) -> [u64;3] {
+        [
+        self.get(Self::PPN_0),
+        self.get(Self::PPN_1),
+        self.get(Self::PPN_2),
+        ]
+    }
+
+    pub fn as_u64(&self) -> u64 {
+        self.0
+    }
+
+    pub fn as_usize(&self) -> usize {
+        self.0 as usize
+    }
+
+    pub fn add(&mut self, a: usize) {
+        // by doing it in this weird looking way
+        // we use the compilers implementation of
+        // address math, instead of making it ourselves.
+        unsafe { self.0 = (self.0 as *mut u8).add(a) as u64 }
+    }
+
+    pub fn sub(&mut self, a: usize) {
+        // by doing it in this weird looking way
+        // we use the compilers implementation of the
+        // address math, instead of making it ourselves.
+        unsafe { self.0 = (self.0 as *mut u8).sub(a) as u64 }
+    }
+
+    pub fn at_offset(&self, offset: usize) -> Self {
+        let mut new = self.clone();
+        new.add(offset);
+        new
+    }
 }
